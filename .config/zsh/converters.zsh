@@ -5,6 +5,15 @@
 # ALIASES
 alias config='/usr/bin/git --git-dir=$HOME/.dotfiles.git/ --work-tree=$HOME'
 #
+
+# Neovim als Standard für vi und vim
+alias vi="nvim"
+alias vim="nvim"
+
+# Optional: Falls du nvim auch als Standard-Editor für Git & Co willst
+export EDITOR="nvim"
+export VISUAL="nvim"
+
 #
 #
 ### My custom symlinks 
