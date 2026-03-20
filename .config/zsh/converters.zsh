@@ -209,3 +209,39 @@ imgtopdf() {
 }
 
 export PATH="$HOME/.local/bin:$PATH"
+
+
+# ── Extensions & Claude Sync ─────────────────────────────────────────────────
+
+# Pullt alle Git-Repos im Extensions-Ordner
+ext_pull() {
+  local ext_dir="$HOME/Developing/Projects/Extensions"
+  echo "=== Extensions pullen ==="
+  for dir in "$ext_dir"/*/; do
+    if [[ -d "$dir/.git" ]]; then
+      echo "\n→ ${dir##*/}"
+      git -C "$dir" pull
+    fi
+  done
+  echo "\nDone."
+}
+
+# Sync ~/.claude vor dem Arbeiten (pull)
+claude_pull() {
+  echo "=== Claude sync: pull ==="
+  git -C "$HOME/.claude" pull origin main
+}
+
+# Sync ~/.claude nach dem Arbeiten (push)
+claude_push() {
+  echo "=== Claude sync: push ==="
+  git -C "$HOME/.claude" add projects/ history.jsonl
+  git -C "$HOME/.claude" commit -m "sync $(date '+%Y-%m-%d %H:%M')" && \
+  git -C "$HOME/.claude" push origin main
+}
+
+# Alles auf einmal: claude pull → ext pull
+dev_start() {
+  claude_pull
+  ext_pull
+}
