@@ -257,6 +257,8 @@ dev_start() {
 # ALIAS & SYMLINKS
 # Dateipfad: ~/.config/zsh/converters.zsh
 
+# Dateipfad: ~/.config/zsh/converters.zsh
+
 GHIBLI_KITCHEN_PATH="$HOME/Developing/Projects/ghibli-kitchen-viewer"
 ZSH_LINK_DIR="$HOME/.config/zsh/links"
 GHIBLI_LINK="$ZSH_LINK_DIR/GhibliKitchen"
@@ -264,6 +266,8 @@ GHIBLI_LINK="$ZSH_LINK_DIR/GhibliKitchen"
 mkdir -p "$ZSH_LINK_DIR"
 
 if [ -d "$GHIBLI_KITCHEN_PATH" ]; then
-  [ -L "$GHIBLI_LINK" ] || [ -e "$GHIBLI_LINK" ] && rm -f "$GHIBLI_LINK"
+  if [ -L "$GHIBLI_LINK" ] || [ -e "$GHIBLI_LINK" ]; then
+    rm -rf "$GHIBLI_LINK"
+  fi
   ln -s "$GHIBLI_KITCHEN_PATH" "$GHIBLI_LINK"
 fi
