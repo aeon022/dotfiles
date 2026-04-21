@@ -245,3 +245,25 @@ dev_start() {
   claude_pull
   ext_pull
 }
+
+
+
+
+
+
+
+
+
+# ALIAS & SYMLINKS
+# Dateipfad: ~/.config/zsh/converters.zsh
+
+GHIBLI_KITCHEN_PATH="$HOME/Developing/Projects/ghibli-kitchen-viewer"
+ZSH_LINK_DIR="$HOME/.config/zsh/links"
+GHIBLI_LINK="$ZSH_LINK_DIR/GhibliKitchen"
+
+mkdir -p "$ZSH_LINK_DIR"
+
+if [ -d "$GHIBLI_KITCHEN_PATH" ]; then
+  [ -L "$GHIBLI_LINK" ] || [ -e "$GHIBLI_LINK" ] && rm -f "$GHIBLI_LINK"
+  ln -s "$GHIBLI_KITCHEN_PATH" "$GHIBLI_LINK"
+fi

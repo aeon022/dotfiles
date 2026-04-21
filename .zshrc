@@ -115,12 +115,21 @@ source $ZSH/oh-my-zsh.sh
 
 
 # --- Custom Scripts ---
-ZSH_SCRIPTS="$HOME/.config/zsh/converters.zsh"
+export CDPATH="$HOME/.config/zsh/links:$CDPATH"
 
-if [ -f "$ZSH_SCRIPTS" ]; then
-    source "$ZSH_SCRIPTS"
+if [ -f "$HOME/.config/zsh/converters.zsh" ]; then
+
+    source "$HOME/.config/zsh/converters.zsh"
+
 fi
 
+# Node Version Manager
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+
+# Node Version Manager
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
