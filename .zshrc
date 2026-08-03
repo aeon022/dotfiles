@@ -137,12 +137,20 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-
 # Added by Antigravity CLI installer
 export PATH="/Users/gweiher/.local/bin:$PATH"
 
-
-alias matcha-lock='tar -czf - -C ~/.config matcha | age -r age1dfd903fvqzzvnzslmysz28xxu5vykp6syqm82ndpvysrs3s7xuts52m4zw > ~/.config/matcha_secure.tar.gz.age && echo "🔒 Matcha-Config verschlüsselt! Bereit für git push."'
+# Matcha Sync Aliase
+alias matcha-lock='tar --exclude="matcha/oauth_tokens" -czf - -C ~/.config matcha | age -r age1dfd903fvqzzvnzslmysz28xxu5vykp6syqm82ndpvysrs3s7xuts52m4zw > ~/.config/matcha_secure.tar.gz.age && echo "🔒 Matcha-Config verschlüsselt! Bereit für git push."'
 
 alias matcha-unlock='age -d -i ~/.age/key.txt ~/.config/matcha_secure.tar.gz.age | tar -xzf - -C ~/.config && echo "🔓 Matcha-Config entschlüsselt und entpackt!"'
 
+# missionctl: Dropbox-Sync für App-Daten (Mac Studio <-> MacBook)
+export BUDGETCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/budgetctl"
+export CALCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/calctl"
+export TASKCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/taskctl"
+export NOTECTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/notectl"
+export MAILCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/mailctl"
+export HABCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/habctl"
+export TIMECTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/timectl"
+export DIARYCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/diaryctl"
