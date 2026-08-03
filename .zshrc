@@ -136,3 +136,13 @@ export NVM_DIR="$HOME/.nvm"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/gweiher/.local/bin:$PATH"
+
+
+alias matcha-lock='tar -czf - -C ~/.config matcha | age -r age1dfd903fvqzzvnzslmysz28xxu5vykp6syqm82ndpvysrs3s7xuts52m4zw > ~/.config/matcha_secure.tar.gz.age && echo "🔒 Matcha-Config verschlüsselt! Bereit für git push."'
+
+alias matcha-unlock='age -d -i ~/.age/key.txt ~/.config/matcha_secure.tar.gz.age | tar -xzf - -C ~/.config && echo "🔓 Matcha-Config entschlüsselt und entpackt!"'
+

@@ -259,7 +259,7 @@ dev_start() {
 
 # Dateipfad: ~/.config/zsh/converters.zsh
 
-GHIBLI_KITCHEN_PATH="$HOME/Developing/Projects/ghibli-kitchen-viewer"
+GHIBLI_KITCHEN_PATH="$HOME/Developing/Projects/moving-kitchen-tales"
 ZSH_LINK_DIR="$HOME/.config/zsh/links"
 GHIBLI_LINK="$ZSH_LINK_DIR/GhibliKitchen"
 
