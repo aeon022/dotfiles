@@ -139,6 +139,12 @@ alias matcha-lock='tar --exclude="matcha/oauth_tokens" -czf - -C ~/.config match
 
 alias matcha-unlock='age -d -i ~/.age/key.txt ~/.config/matcha_secure.tar.gz.age | tar -xzf - -C ~/.config && echo "🔓 Matcha-Config entschlüsselt und entpackt!"'
 
+# postctl Accounts (config.yaml inkl. API-Tokens) via Dropbox statt Git syncen,
+# analog zu matcha-lock/-unlock, aber Ziel ist Dropbox (postctl.db liegt eh dort).
+alias postctl-lock='tar -czf - -C ~/.config postctl | age -r age1dfd903fvqzzvnzslmysz28xxu5vykp6syqm82ndpvysrs3s7xuts52m4zw > ~/Dropbox/Apps/missionctl/postctl/postctl_config.tar.gz.age && echo "🔒 postctl-Accounts verschlüsselt nach Dropbox synced!"'
+
+alias postctl-unlock='age -d -i ~/.age/key.txt ~/Dropbox/Apps/missionctl/postctl/postctl_config.tar.gz.age | tar -xzf - -C ~/.config && echo "🔓 postctl-Accounts entschlüsselt und entpackt!"'
+
 # missionctl: Dropbox-Sync für App-Daten (Mac Studio <-> MacBook)
 export BUDGETCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/budgetctl"
 export CALCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/calctl"
