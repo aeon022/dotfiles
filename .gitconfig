@@ -1,0 +1,17 @@
+[user]
+	name = aeon022
+	email = gerwin.weiher@gmail.com
+[core]
+	excludesfile = /Users/gweiher/.gitignore_global
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[commit]
+	template = /Users/gweiher/.stCommitMsg
+[init]
+	defaultBranch = main
+[http]
+	postBuffer = 157286400
