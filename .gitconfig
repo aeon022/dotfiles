@@ -15,3 +15,7 @@
 	defaultBranch = main
 [http]
 	postBuffer = 157286400
+[credential]
+	helper = osxkeychain
+[push]
+	autoSetupRemote = true
