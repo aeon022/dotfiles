@@ -1,24 +1,52 @@
 # Dateipfad: ~/.config/zsh/converters.zsh
 #
-####### SKRIPTEN SAMMLUNG
+####### SKRIPTEN SAMMLUNG #######
 #
-# ALIASES
-alias config='/usr/bin/git --git-dir=$HOME/.dotfiles.git/ --work-tree=$HOME'
+# INHALTSVERZEICHNIS
 #
+#   EDITOR & BASICS
+#     config                → git-Alias für Dotfiles-Repo ($HOME als Worktree)
+#     vi / vim               → Alias auf nvim
+#     $EDITOR / $VISUAL      → nvim als Standard-Editor
+#
+#   BILDER & FOTOS
+#     foto_rename            → JPGs in Unterordnern nach Ordnername + Datum umbenennen
+#     web_export              → Bilder im aktuellen Ordner umbenennen, auf 1240px skalieren, zu WebP
+#     web_export_recursive    → wie web_export, aber rekursiv über alle Unterordner (JPG/JPEG/HEIC/PNG)
+#     move_webp_export        → sammelt alle .webp aus Unterordnern in ./webp_export
+#     imgtopdf                → alle PNG/JPG im Ordner zu einem gemeinsamen PDF zusammenfügen
+#
+#   PDF & DOKUMENTE
+#     doc2pdf                 → Alias: LibreOffice headless, beliebiges Dokument → PDF
+#     pdfconvert [-m] [datei] → PDF → DOCX (Standard) oder Markdown (-m/--markdown);
+#                               ohne Dateiangabe: alle *.pdf im aktuellen Ordner
+#
+#   SYNC & EXTENSIONS
+#     ext_pull                → git pull für alle Repos in ~/Developing/Projects/Extensions
+#     claude_pull              → git pull für ~/.claude (vor dem Arbeiten)
+#     claude_push              → git add/commit/push für ~/.claude (nach dem Arbeiten)
+#     dev_start                → claude_pull + ext_pull in einem Rutsch
+#
+#   SYMLINKS
+#     GhibliKitchen            → Symlink in ~/.config/zsh/links auf das moving-kitchen-tales-Projekt
+#
+##################################
 
-# Neovim als Standard für vi und vim
+
+# ── Editor & Basics ──────────────────────────────────────────────────────────
+
+alias config='/usr/bin/git --git-dir=$HOME/.dotfiles.git/ --work-tree=$HOME'
+
+# Neovim als Standard für vi, vim und den Git-Editor
 alias vi="nvim"
 alias vim="nvim"
-
-# Optional: Falls du nvim auch als Standard-Editor für Git & Co willst
 export EDITOR="nvim"
 export VISUAL="nvim"
 
-#
-#
-### My custom symlinks 
-alias doc2pdf='/Applications/LibreOffice.app/Contents/MacOS/soffice --headless --convert-to pdf'
+export PATH="$HOME/.local/bin:$PATH"
 
+
+# ── Bilder & Fotos ────────────────────────────────────────────────────────────
 
 # Alle JPGs in Unterordnern nach Ordnername & Datum umbenennen
 foto_rename() {
@@ -33,11 +61,11 @@ foto_rename() {
     clean_name="${clean_name//ß/ss}"
     clean_name="${clean_name//„/ae}"
     clean_name="${clean_name//”/oe}"
-    
+
     echo "Verarbeite Ordner: $dir_name -> $clean_name"
-    
+
     i=1
-    # (On) sortiert nach Name (alt), (om) nach Datum. 
+    # (On) sortiert nach Name (alt), (om) nach Datum.
     # Wir nutzen (om) für die zeitliche Abfolge.
     for f in "$d"*(#i)jpg(om); do
       if [ -f "$f" ]; then
@@ -63,34 +91,26 @@ web_export() {
     if [[ -f "$f" ]]; then
       local base="${f%.*}"
       local base_clean="${base// /_}"
-      
+
       # Zielname: Ordner_Originalname_Index.webp
       local out_name="${folder_clean}_${base_clean}_$(printf "%03d" $i).webp"
-      
+
       echo "Verarbeite: $f -> $out_name"
-      
+
       # -auto-orient hinzugefügt, um Rotationsfehler zu vermeiden
       magick "$f" -auto-orient -resize "1240x1240>" -density 72 -quality 80 "$out_name"
-      
+
       ((i++))
     fi
   done
   echo "Fertig! $((i-1)) WebP-Dateien wurden erstellt."
 }
 
-
-#
-# Rekursion (**/*): Das Skript sucht jetzt in allen Unterordnern.
-#
-# Zähler pro Ordner (local -A counters): Da du mehrere Ordner durchsuchst, merkt sich das Skript den aktuellen Zählerstand für jeden Ordner separat.
-# 
-# Dateigröße & Dimensionen: Durch -resize "1920x1920>" passt sich das Bild automatisch an – egal ob Hoch- oder Querformat, die jeweils längste Seite wird auf maximal 1920 Pixel gesetzt. WebP mit -quality 80 ist ein perfekter Sweetspot: Die Bilder bleiben visuell sehr gut, landen aber erfahrungsgemäß locker unter der 500-KB-Marke.
-# 
-# Ablageort: Die fertigen .webp-Dateien werden direkt im selben Unterordner gespeichert, in dem auch das Originalbild liegt.
-#
-#
-#
-
+# Wie web_export, aber rekursiv über alle Unterordner (JPG/JPEG/HEIC/PNG).
+# Zähler pro Ordner (local -A counters), damit die Nummerierung je Unterordner
+# separat läuft. -resize "1920x1920>" begrenzt die längste Seite auf 1920px,
+# ohne kleine Bilder aufzublähen. Die .webp-Dateien landen direkt neben dem
+# jeweiligen Original im selben Unterordner.
 web_export_recursive() {
   setopt extendedglob
   # Assoziatives Array, um die laufenden Nummern pro Ordner zu speichern
@@ -102,16 +122,16 @@ web_export_recursive() {
   # Durchsucht alle Ordner nach jpg, jpeg, heic und png (case-insensitive)
   for f in **/*.(#i)(jpg|jpeg|heic|png); do
     if [[ -f "$f" ]]; then
-      
+
       # 1. Pfad und Ordnernamen extrahieren
       local dir="${f%/*}"
-      [[ "$dir" == "$f" ]] && dir="." 
-      
+      [[ "$dir" == "$f" ]] && dir="."
+
       local folder="${dir##*/}"
       [[ "$folder" == "." ]] && folder="${PWD##*/}"
-      
+
       local folder_clean="${folder// /_}"
-      
+
       # 2. Dateinamen extrahieren
       local filename="${f##*/}"
       local base="${filename%.*}"
@@ -129,7 +149,7 @@ web_export_recursive() {
 
       # 4. Ausgabepfad festlegen
       local out_path="${dir}/${out_name}"
-      
+
       echo "Verarbeite: $f -> $out_path ..."
 
       # 5. Konvertierung mit ImageMagick
@@ -144,12 +164,10 @@ web_export_recursive() {
   echo "Fertig! $total WebP-Dateien wurden erstellt."
 }
 
-
-
-# Du führst web_export_recursive aus. Die Bilder werden konvertiert, umbenannt und bleiben vorerst direkt neben den Originalen in ihren jeweiligen Unterordnern.
-
-# Wenn du alle konvertiert hast und sie sammeln möchtest, tippst du move_webp_export ein. Das Skript saugt alle .webp-Dateien aus den Unterordnern ab und schiebt sie in den neuen Ordner webp_export in deinem aktuellen Verzeichnis.
-
+# Workflow: erst web_export_recursive ausführen (konvertiert & benennt um,
+# Dateien bleiben neben den Originalen), danach move_webp_export, um alle
+# .webp-Dateien aus den Unterordnern in einen gemeinsamen Ordner webp_export
+# im aktuellen Verzeichnis zu sammeln.
 move_webp_export() {
   setopt extendedglob
   local export_dir="${PWD}/webp_export"
@@ -166,10 +184,10 @@ move_webp_export() {
   # Durchsucht alle Ordner und Unterordner nach .webp Dateien
   for f in **/*.webp; do
     if [[ -f "$f" ]]; then
-      
+
       # Prüfen, ob die Datei nicht ohnehin schon im Export-Ordner liegt
       if [[ "$f" != webp_export/* && "$f" != */webp_export/* ]]; then
-        
+
         local filename="${f##*/}"
         local dest="${export_dir}/${filename}"
 
@@ -190,15 +208,12 @@ move_webp_export() {
   echo "Fertig! $count WebP-Dateien wurden in den Ordner 'webp_export' verschoben."
 }
 
-
-# Konvertieren von Bildern zu EINEM Pdf
-
-# Bilder zu PDF Konverter (Bulk)
+# Bilder zu PDF Konverter (Bulk): fügt alle PNG/JPG im Ordner zu einem PDF zusammen
 imgtopdf() {
     local folder="${PWD##*/}"
     local folder_clean="${folder// /_}"
     local files=(*.(png|jpg|jpeg|PNG|JPG|JPEG)(Nn))
-    
+
     if [ ${#files[@]} -gt 0 ]; then
         echo "Wandle ${#files[@]} Bilder um..."
         magick "${files[@]}" "${folder_clean}_gesamt.pdf"
@@ -208,10 +223,69 @@ imgtopdf() {
     fi
 }
 
-export PATH="$HOME/.local/bin:$PATH"
+
+# ── PDF & Dokumente ───────────────────────────────────────────────────────────
+
+alias doc2pdf='/Applications/LibreOffice.app/Contents/MacOS/soffice --headless --convert-to pdf'
+
+# PDF zu DOCX (Standard) oder Markdown (-m) konvertieren
+# Nutzung: pdfconvert [-m|--markdown] [datei.pdf ...]
+# Ohne Dateiangabe: alle PDFs im aktuellen Ordner
+pdfconvert() {
+  setopt local_options extendedglob null_glob
+  local mode="docx"
+  local -a files
+
+  for arg in "$@"; do
+    case "$arg" in
+      -m|--markdown) mode="md" ;;
+      -h|--help)
+        echo "Nutzung: pdfconvert [-m|--markdown] [datei.pdf ...]"
+        return 0
+        ;;
+      *) files+=("$arg") ;;
+    esac
+  done
+
+  [ ${#files[@]} -eq 0 ] && files=(*.(#i)pdf)
+
+  if [ ${#files[@]} -eq 0 ]; then
+    echo "❌ Keine PDF-Dateien gefunden."
+    return 1
+  fi
+
+  echo "Konvertiere ${#files[@]} PDF(s) nach ${mode}..."
+
+  for f in "${files[@]}"; do
+    if [[ ! -f "$f" ]]; then
+      echo "⚠️  Übersprungen (nicht gefunden): $f"
+      continue
+    fi
+    local base="${f:t:r}"
+    local dir="${f:h}"
+
+    if [[ "$mode" == "docx" ]]; then
+      local out="${dir}/${base}.docx"
+      if pdf2docx convert "$f" "$out" >/dev/null 2>&1; then
+        echo "✅ $out"
+      else
+        echo "❌ Fehler bei $f"
+      fi
+    else
+      local out="${dir}/${base}.md"
+      if markitdown "$f" -o "$out" >/dev/null 2>&1; then
+        echo "✅ $out"
+      else
+        echo "❌ Fehler bei $f"
+      fi
+    fi
+  done
+
+  echo "Fertig."
+}
 
 
-# ── Extensions & Claude Sync ─────────────────────────────────────────────────
+# ── Sync & Extensions ─────────────────────────────────────────────────────────
 
 # Pullt alle Git-Repos im Extensions-Ordner
 ext_pull() {
@@ -247,17 +321,7 @@ dev_start() {
 }
 
 
-
-
-
-
-
-
-
-# ALIAS & SYMLINKS
-# Dateipfad: ~/.config/zsh/converters.zsh
-
-# Dateipfad: ~/.config/zsh/converters.zsh
+# ── Symlinks ──────────────────────────────────────────────────────────────────
 
 GHIBLI_KITCHEN_PATH="$HOME/Developing/Projects/moving-kitchen-tales"
 ZSH_LINK_DIR="$HOME/.config/zsh/links"
