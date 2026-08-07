@@ -126,13 +126,18 @@ if [ -f "$HOME/.config/zsh/converters.zsh" ]; then
 
 fi
 
-# Node Version Manager
+# Node Version Manager (lazy geladen: nvm.sh wird erst beim ersten
+# Aufruf von nvm/node/npm/npx gesourct, spart ~0.7s pro Shell-Start)
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-# Added by Antigravity CLI installer
-export PATH="/Users/gweiher/.local/bin:$PATH"
+nvm() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  nvm "$@"
+}
+node() { nvm >/dev/null; node "$@"; }
+npm()  { nvm >/dev/null; npm "$@"; }
+npx()  { nvm >/dev/null; npx "$@"; }
 
 # Matcha Sync Aliase
 alias matcha-lock='tar --exclude="matcha/oauth_tokens" -czf - -C ~/.config matcha | age -r age1dfd903fvqzzvnzslmysz28xxu5vykp6syqm82ndpvysrs3s7xuts52m4zw > ~/.config/matcha_secure.tar.gz.age && echo "🔒 Matcha-Config verschlüsselt! Bereit für git push."'
