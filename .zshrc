@@ -137,6 +137,9 @@ nvm() {
 }
 node() { nvm >/dev/null; node "$@"; }
 npm()  { nvm >/dev/null; npm "$@"; }
+
+# ~/.local/bin: Claude Code (native installer) & andere CLIs (budgetctl, calctl, ...)
+export PATH="/Users/gweiher/.local/bin:$PATH"
 npx()  { nvm >/dev/null; npx "$@"; }
 
 # Matcha Sync Aliase
