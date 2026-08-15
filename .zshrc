@@ -166,4 +166,5 @@ export DIARYCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/diaryctl"
 # AIDER
 # alias aider-local='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/codestral'
 alias localcode='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/codestral --edit-format whole'
+alias aider-local='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/mistral'
 
