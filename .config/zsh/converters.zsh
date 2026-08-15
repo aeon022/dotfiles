@@ -305,9 +305,11 @@ claude_pull() {
 }
 
 # Sync ~/.claude nach dem Arbeiten (push)
+# settings.json trägt u.a. enabledPlugins (z.B. ponytail, superpowers) — ohne
+# das hier mitzunehmen, sieht das MacBook nicht, welche Plugins aktiv sind.
 claude_push() {
   echo "=== Claude sync: push ==="
-  git -C "$HOME/.claude" add projects/ history.jsonl
+  git -C "$HOME/.claude" add projects/ history.jsonl settings.json
   git -C "$HOME/.claude" commit -m "sync $(date '+%Y-%m-%d %H:%M')" && \
   git -C "$HOME/.claude" push origin main
 }
