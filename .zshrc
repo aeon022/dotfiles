@@ -120,6 +120,11 @@ setopt CHASE_LINKS
 # --- Custom Scripts ---
 export CDPATH="$HOME/.config/zsh/links:$CDPATH"
 
+# missionctl-Suite: kein ANTHROPIC_API_KEY gesetzt -> Tools fallen automatisch
+# auf lokales Ollama zurück (missionctl-core/ai), Default-Modell dabei ist
+# "llama3.2" (nicht gepullt) -> auf "mistral" (vorhanden) umbiegen.
+export OLLAMA_MODEL="mistral"
+
 if [ -f "$HOME/.config/zsh/converters.zsh" ]; then
 
     source "$HOME/.config/zsh/converters.zsh"
