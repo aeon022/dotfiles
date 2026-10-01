@@ -299,9 +299,14 @@ ext_pull() {
 }
 
 # Sync ~/.claude vor dem Arbeiten (pull)
+# Claude Code schreibt laufend in history.jsonl/settings.json — lokalen Stand
+# erst committen, sonst bricht der Merge mit "would be overwritten" ab.
 claude_pull() {
   echo "=== Claude sync: pull ==="
-  git -C "$HOME/.claude" pull origin main
+  git -C "$HOME/.claude" add projects/ history.jsonl settings.json
+  git -C "$HOME/.claude" diff --cached --quiet || \
+    git -C "$HOME/.claude" commit -m "sync $(date '+%Y-%m-%d %H:%M')"
+  git -C "$HOME/.claude" pull --no-rebase origin main
 }
 
 # Sync ~/.claude nach dem Arbeiten (push)
