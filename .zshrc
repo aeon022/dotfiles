@@ -174,3 +174,6 @@ alias localcode='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/cod
 alias aider-local='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/mistral'
 alias aider-qwen='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/qwen2.5-coder:7b'
 
+
+# Claude Code mit dem Arbeitsaccount (Brücke): eigener Login, eigene Einstellungen
+alias claude-bruecke='CLAUDE_CONFIG_DIR="$HOME/.claude-bruecke" claude'
