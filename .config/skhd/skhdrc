@@ -1,2 +1,2 @@
 # Quake-style kitty toggle (replaces broken macOS Service on Tahoe)
-ctrl + shift - space : /opt/homebrew/bin/kitten quick-access-terminal
+ctrl + shift - space : cd ~ && /opt/homebrew/bin/kitten quick-access-terminal
