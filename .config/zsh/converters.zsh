@@ -439,6 +439,8 @@ media_export() {
     [[ -n "$stem_slug" ]] || stem_slug="foto"
 
     canonical="${prefix}_${folder_slug}_${stem_slug}"
+    # Name trägt Präfix und Ordner schon (früher umbenannte PDFs): nicht doppelt voranstellen
+    [[ "$stem_slug" == "${prefix}_${folder_slug}_"* ]] && canonical="$stem_slug"
     ext="${f:e:l}"
 
     if [[ "$ext" != "pdf" ]]; then
@@ -498,8 +500,12 @@ media_export() {
       jpg="$outdir/${page_base}.jpg"
       webp="$outdir/${page_base}.webp"
 
-      if [[ -e "$jpg" || -e "$webp" ]] ||
-         ! magick "$tmp/page.jpg" -auto-orient -background white -alpha remove -alpha off -quality 90 "$jpg" ||
+      if [[ -e "$jpg" || -e "$webp" ]]; then
+        success=0   # vorhandene Ausgabe nie löschen
+        break
+      fi
+
+      if ! magick "$tmp/page.jpg" -auto-orient -background white -alpha remove -alpha off -quality 90 "$jpg" ||
          ! magick "$jpg" -quality 82 "$webp"; then
         rm -f "$jpg" "$webp"
         success=0
