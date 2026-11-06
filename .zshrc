@@ -77,7 +77,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git bang-hints)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -169,11 +169,9 @@ export TIMECTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/timectl"
 export DIARYCTL_DATA_DIR="$HOME/Dropbox/Apps/missionctl/diaryctl"
 
 # AIDER
-# alias aider-local='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/codestral'
-alias localcode='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/codestral --edit-format whole'
-alias aider-local='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/mistral'
-alias aider-qwen='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama/qwen2.5-coder:7b'
-
+alias aider-local='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama_chat/mistral:latest --edit-format whole'
+alias localcode='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama_chat/devstral:24b --edit-format diff --yes-always'
+alias aider-qwen='OLLAMA_API_BASE=http://localhost:11434 aider --model ollama_chat/qwen3:14b --edit-format whole'
 
 # Claude Code mit dem Arbeitsaccount (Brücke): eigener Login, eigene Einstellungen
 alias claude-bruecke='CLAUDE_CONFIG_DIR="$HOME/.claude-bruecke" claude'
