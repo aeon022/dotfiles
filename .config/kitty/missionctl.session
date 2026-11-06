@@ -1,0 +1,9 @@
+# Erstellt einen neuen Tab und setzt den Titel
+cd ~
+new_tab MISSIONCTL
+title MISSIONCTL
+    
+# Startet missionctl. 
+# Wenn du möchtest, dass das Terminal nach Beenden von missionctl offen bleibt, nutze stattdessen:
+# launch zsh -c "missionctl; exec zsh"
+launch zsh -l -c "source ~/.zshrc >/dev/null 2>&1; missionctl; exec zsh"
