@@ -340,3 +340,191 @@ if [ -d "$GHIBLI_KITCHEN_PATH" ]; then
   fi
   ln -s "$GHIBLI_KITCHEN_PATH" "$GHIBLI_LINK"
 fi
+
+
+# Archive Export Skript
+#
+# Exportiert Fotos und gescannte PDFs als JPG und WebP.
+# Die Unterordnerstruktur wird im Zielordner gespiegelt. Dateinamen folgen
+# dem Muster <prefix>_<unterordner>_<foto>.jpg/.webp.
+# Generische Namen wie „Scannen 41“ werden zu „foto_41“; aussagekräftige
+# Dateinamen bleiben erhalten. Mehrseitige PDFs bekommen Seitennummern.
+# Originalbilder bleiben unverändert. PDFs werden standardmäßig nicht
+# umbenannt; mit --rename-pdfs erst nach erfolgreichem Export.
+# Nutzung: media_export <quellordner> [zielordner] [prefix] [--rename-pdfs]
+# Benötigt: magick, pdfinfo und pdftoppm (Poppler).
+#
+# source ~/.config/zsh/converters.zsh
+# media_export "$HOME/Library/CloudStorage/OneDrive-VereinDieBrücke/Büro/Media/Archive" "$HOME/Library/CloudStorage/OneDrive-VereinDieBrücke/Büro/Media/Archive/_konvertiert" archiv --rename-pdfs
+#
+#
+
+_media_slug() {
+  local value="${1:l}"
+  value="${value//ä/ae}"
+  value="${value//ö/oe}"
+  value="${value//ü/ue}"
+  value="${value//ß/ss}"
+  value="${value//[^a-z0-9]/_}"
+  while [[ "$value" == *__* ]]; do value="${value//__/_}"; done
+  value="${value#_}"
+  value="${value%_}"
+  print -r -- "$value"
+}
+
+media_export() {
+  setopt local_options extendedglob null_glob
+
+  local src="${1:-$PWD}"
+  src="${src:A}"
+  if [[ ! -d "$src" ]]; then
+    print -u2 "Quellordner nicht gefunden: $src"
+    return 1
+  fi
+
+  local dest="${2:-$src/_konvertiert}"
+  dest="${dest:A}"
+  local prefix="$(_media_slug "${3:-${src:t}}")"
+  local rename_pdfs="${4:-}"
+
+  if [[ -n "$rename_pdfs" && "$rename_pdfs" != "--rename-pdfs" ]]; then
+    print -u2 "Vierter Parameter muss --rename-pdfs lauten."
+    return 1
+  fi
+
+  local tool
+  for tool in magick pdfinfo pdftoppm; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+      print -u2 "Benötigtes Programm fehlt: $tool"
+      return 1
+    fi
+  done
+
+  mkdir -p "$dest" || return 1
+
+  local -a files created
+  local -A counters
+  files=("$src"/**/*.(#i)(jpg|jpeg|png|heic|tif|tiff|webp|pdf)(N))
+
+  local f relative parent folder_slug outdir base stem_slug digits canonical ext
+  local jpg webp pdf_dest pages page page_base tmp success next
+  local converted=0 skipped=0
+
+  for f in "${files[@]}"; do
+    [[ "$f" == "$dest"/* ]] && continue
+
+    relative="${f#$src/}"
+    parent="${relative:h}"
+    [[ "$parent" == "." ]] && parent=""
+    folder_slug="$(_media_slug "$parent")"
+    [[ -n "$folder_slug" ]] || folder_slug="hauptordner"
+
+    outdir="$dest"
+    [[ -n "$parent" ]] && outdir="$dest/$parent"
+    mkdir -p "$outdir" || return 1
+
+    base="${relative:t:r}"
+    stem_slug="$(_media_slug "$base")"
+
+    if [[ "$base" == (#i)(scan|scannen|scanner|scanned|img|dsc|pxl|wp|sam|pic|photo|bild|dji|screenshot)* ]]; then
+      digits="${base//[^0-9]/}"
+      if [[ -n "$digits" ]]; then
+        stem_slug="foto_${digits}"
+      else
+        next=$(( ${counters[$folder_slug]:-0} + 1 ))
+        counters[$folder_slug]=$next
+        stem_slug="foto_$(printf '%03d' "$next")"
+      fi
+    fi
+    [[ -n "$stem_slug" ]] || stem_slug="foto"
+
+    canonical="${prefix}_${folder_slug}_${stem_slug}"
+    ext="${f:e:l}"
+
+    if [[ "$ext" != "pdf" ]]; then
+      jpg="$outdir/${canonical}.jpg"
+      webp="$outdir/${canonical}.webp"
+
+      if [[ -e "$jpg" || -e "$webp" ]]; then
+        print "Übersprungen, Ausgabe existiert bereits: $outdir/$canonical"
+        skipped=$((skipped + 1))
+        continue
+      fi
+
+      if ! magick "$f" -auto-orient -background white -alpha remove -alpha off -quality 90 "$jpg"; then
+        print -u2 "Fehler beim Erzeugen von $jpg"
+        rm -f "$jpg"
+        skipped=$((skipped + 1))
+        continue
+      fi
+      if ! magick "$jpg" -quality 82 "$webp"; then
+        print -u2 "Fehler beim Erzeugen von $webp"
+        rm -f "$jpg" "$webp"
+        skipped=$((skipped + 1))
+        continue
+      fi
+
+      print "Erstellt: $jpg und $webp"
+      converted=$((converted + 1))
+      continue
+    fi
+
+    pdf_dest="${f:h}/${canonical}.pdf"
+    if [[ "$rename_pdfs" == "--rename-pdfs" && "$pdf_dest" != "$f" && -e "$pdf_dest" ]]; then
+      print "PDF-Ziel existiert bereits, übersprungen: $pdf_dest"
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    pages="$(pdfinfo "$f" 2>/dev/null | awk '/^Pages:[[:space:]]/ {print $2; exit}')"
+    if [[ "$pages" != <-> ]]; then
+      print -u2 "PDF nicht lesbar oder Seitenzahl fehlt: $f"
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    tmp="$(mktemp -d "${TMPDIR:-/tmp}/media-export.XXXXXX")" || return 1
+    created=()
+    success=1
+
+    for ((page = 1; page <= pages; page++)); do
+      if ! pdftoppm -f "$page" -l "$page" -singlefile -jpeg -r 180 "$f" "$tmp/page" >/dev/null 2>&1; then
+        success=0
+        break
+      fi
+
+      page_base="$canonical"
+      (( pages > 1 )) && page_base="${canonical}_seite_$(printf '%03d' "$page")"
+      jpg="$outdir/${page_base}.jpg"
+      webp="$outdir/${page_base}.webp"
+
+      if [[ -e "$jpg" || -e "$webp" ]] ||
+         ! magick "$tmp/page.jpg" -auto-orient -background white -alpha remove -alpha off -quality 90 "$jpg" ||
+         ! magick "$jpg" -quality 82 "$webp"; then
+        rm -f "$jpg" "$webp"
+        success=0
+        break
+      fi
+
+      created+=("$jpg" "$webp")
+    done
+
+    rm -rf "$tmp"
+
+    if (( success )); then
+      if [[ "$rename_pdfs" == "--rename-pdfs" && "$pdf_dest" != "$f" ]] && ! mv "$f" "$pdf_dest"; then
+        print -u2 "Bilder exportiert, PDF konnte aber nicht umbenannt werden: $f"
+        skipped=$((skipped + 1))
+        continue
+      fi
+      print "PDF exportiert: $relative"
+      converted=$((converted + 1))
+    else
+      (( ${#created[@]} )) && rm -f "${created[@]}"
+      print -u2 "PDF-Konvertierung fehlgeschlagen oder Ausgabedatei existiert: $f"
+      skipped=$((skipped + 1))
+    fi
+  done
+
+  print "Fertig: $converted verarbeitet, $skipped übersprungen."
+}
